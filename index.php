@@ -98,4 +98,39 @@ function custom_taxonomy() {
   register_taxonomy( 'directory_cat', array( 'directory' ), $args );
 
 }
+add_action( 'init', 'custom_taxonomy', 0 );
 
+// Add Shortcode
+function display_directory_list( $atts ) {
+
+  // Attributes
+  $atts = shortcode_atts(
+    array(
+      'limit' => '',
+    ),
+    $atts
+  );
+
+  // custom post query
+$args = array(
+    'post_type'      => 'directory',
+    'posts_per_page' => 5,
+);
+$loop = new WP_Query($args);
+while ( $loop->have_posts() ) {
+    $loop->the_post();
+    ?>
+    <div class="entry-content">
+      <?php
+         if (has_post_thumbnail()){
+          the_post_thumbnail();
+         }
+
+       ?>
+      <?php the_title(); ?>
+    </div>
+    <?php
+}
+
+}
+add_shortcode( 'directory_list', 'display_directory_list' );
