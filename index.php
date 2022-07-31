@@ -56,7 +56,7 @@ function custom_post_type() {
     'publicly_queryable'    => true,
     'capability_type'       => 'page',
   );
-  register_post_type( 'directory', $args );
+  register_post_type( 'directory', $args ); //Id of custom post type is directory
 
 }
 add_action( 'init', 'custom_post_type', 0 );
@@ -134,3 +134,49 @@ while ( $loop->have_posts() ) {
 
 }
 add_shortcode( 'directory_list', 'display_directory_list' );
+
+add_action( 'add_meta_boxes', 'directory_contact_add_meta_box' );
+add_action( 'save_post', 'directory_save_contact_email_data' );
+
+/* CONTACT META BOXES */
+
+function directory_contact_add_meta_box() {
+  add_meta_box( 'contact_email', 'User Email', 'directory_contact_email_callback', 'directory', 'normal' );
+}
+
+function directory_contact_email_callback( $post ) {
+  wp_nonce_field( 'directory_save_contact_email_data', 'directory_contact_email_meta_box_nonce' );
+  
+  $value = get_post_meta( $post->ID, '_contact_email_value_key', true );
+  
+  echo '<label for="directory_contact_email_field">User Email Address: </lable>';
+  echo '<input type="email" id="directory_contact_email_field" name="directory_contact_email_field" value="' . esc_attr( $value ) . '" size="25" />';
+}
+
+function directory_save_contact_email_data( $post_id ) {
+  
+  if( ! isset( $_POST['directory_contact_email_meta_box_nonce'] ) ){
+    return;
+  }
+  
+  if( ! wp_verify_nonce( $_POST['directory_contact_email_meta_box_nonce'], 'directory_save_contact_email_data') ) {
+    return;
+  }
+  
+  if( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ){
+    return;
+  }
+  
+  if( ! current_user_can( 'edit_post', $post_id ) ) {
+    return;
+  }
+  
+  if( ! isset( $_POST['directory_contact_email_field'] ) ) {
+    return;
+  }
+  
+  $my_data = sanitize_text_field( $_POST['directory_contact_email_field'] );
+  
+  update_post_meta( $post_id, '_contact_email_value_key', $my_data );
+  
+}
