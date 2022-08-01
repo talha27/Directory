@@ -137,11 +137,16 @@ add_shortcode( 'directory_list', 'display_directory_list' );
 
 add_action( 'add_meta_boxes', 'directory_contact_add_meta_box' );
 add_action( 'save_post', 'directory_save_contact_email_data' );
-
+add_action( 'save_post', 'directory_save_contact_number_data' );
+add_action( 'save_post', 'directory_save_contact_dob_data' );
+add_action( 'save_post', 'directory_save_contact_gender_data' );
 /* CONTACT META BOXES */
 
 function directory_contact_add_meta_box() {
   add_meta_box( 'contact_email', 'User Email', 'directory_contact_email_callback', 'directory', 'normal' );
+  add_meta_box( 'contact_number', 'Contact Number', 'directory_contact_number_callback', 'directory', 'normal' );
+  add_meta_box( 'contact_dob', 'Date of Birth', 'directory_contact_dob_callback', 'directory', 'normal' );
+  
 }
 
 function directory_contact_email_callback( $post ) {
@@ -178,5 +183,84 @@ function directory_save_contact_email_data( $post_id ) {
   $my_data = sanitize_text_field( $_POST['directory_contact_email_field'] );
   
   update_post_meta( $post_id, '_contact_email_value_key', $my_data );
+  
+}
+
+//Number Meta Box
+function directory_contact_number_callback( $post ) {
+  wp_nonce_field( 'directory_save_contact_number_data', 'directory_contact_number_meta_box_nonce' );
+  
+  $value = get_post_meta( $post->ID, '_contact_number_value_key', true );
+  
+  echo '<label for="directory_contact_number_field">User Mobile Number: </lable>';
+  echo '<input type="tel" id="directory_contact_number_field" pattern ="[0-9]{11}" name="directory_contact_number_field" value="' . esc_attr( $value ) . '" size="25" />';
+}
+
+function directory_save_contact_number_data( $post_id ) {
+  
+  if( ! isset( $_POST['directory_contact_number_meta_box_nonce'] ) ){
+    return;
+  }
+  
+  if( ! wp_verify_nonce( $_POST['directory_contact_number_meta_box_nonce'], 'directory_save_contact_number_data') ) {
+    return;
+  }
+  
+  if( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ){
+    return;
+  }
+  
+  if( ! current_user_can( 'edit_post', $post_id ) ) {
+    return;
+  }
+  
+  if( ! isset( $_POST['directory_contact_number_field'] ) ) {
+    return;
+  }
+  
+  $my_data = sanitize_text_field( $_POST['directory_contact_number_field'] );
+  
+  update_post_meta( $post_id, '_contact_number_value_key', $my_data );
+  
+}
+
+//DOB Meta Box
+function directory_contact_dob_callback( $post ) {
+  wp_nonce_field( 'directory_save_contact_dob_data', 'directory_contact_dob_meta_box_nonce' );
+  
+  $value = get_post_meta( $post->ID, '_contact_dob_value_key', true );
+  
+  echo '<label for="directory_contact_dob_field">Date of Birth: </lable>';
+  echo '<input type="date" id="directory_contact_dob_field" name="directory_contact_dob_field" value="' . esc_attr( $value ) . '" size="25" />';
+}
+
+function directory_save_contact_dob_data( $post_id ) {
+  
+  if( ! isset( $_POST['directory_contact_dob_meta_box_nonce'] ) ){
+    return;
+  }
+  
+  if( ! wp_verify_nonce( $_POST['directory_contact_dob_meta_box_nonce'], 'directory_save_contact_dob_data') ) {
+    return;
+  }
+  
+  if( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ){
+    return;
+  }
+  
+  if( ! current_user_can( 'edit_post', $post_id ) ) {
+    return;
+  }
+  
+  if( ! isset( $_POST['directory_contact_dob_field'] ) ) {
+    return;
+  }
+
+
+  
+  $my_data = sanitize_text_field( $_POST['directory_contact_dob_field'] );
+
+  
+  update_post_meta( $post_id, '_contact_dob_value_key', $my_data );
   
 }
